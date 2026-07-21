@@ -1,0 +1,25 @@
+# Machine-readable twin of docs/safety.md's Path Denylist and Auto-Merge
+# Policy sections. Used by tools/loop-gate. Keep in sync with docs/safety.md
+# when either changes.
+version: 1
+
+denylist:
+  - ".env"
+  - ".env.*"
+  - "**/secrets/**"
+  - "**/credentials/**"
+  - "**/*_key*"
+  - "**/*_secret*"
+  - ".terraform/**"
+  - "k8s/production/**"
+  - "**/migrations/**"
+  - "auth/**"
+  - "payments/**"
+  - "billing/**"
+
+maxFiles: 10
+
+autoMergeAllowlist:
+  - "docs/**"
+  - "**/*.md"
+  - "**/*.test.mjs"

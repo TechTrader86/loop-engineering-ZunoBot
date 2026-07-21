@@ -1,0 +1,27 @@
+# Machine-readable twin of your project's safety policy (see docs/safety.md
+# in loop-engineering for the prose this is meant to mirror). Copy to your
+# repo root as gate.yaml and adjust denylist/autoMergeAllowlist for your
+# project's own sensitive paths.
+version: 1
+
+denylist:
+  - ".env"
+  - ".env.*"
+  - "**/secrets/**"
+  - "**/credentials/**"
+  - "**/*_key*"
+  - "**/*_secret*"
+  - ".terraform/**"
+  - "k8s/production/**"
+  - "**/migrations/**"
+  - "auth/**"
+  - "payments/**"
+  - "billing/**"
+
+# Escalate instead of auto-merging when a change touches more than this many files.
+maxFiles: 10
+
+# --action auto-merge only proceeds if every changed path matches one of these.
+autoMergeAllowlist:
+  - "docs/**"
+  - "**/*.md"

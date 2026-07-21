@@ -1,0 +1,55 @@
+name: Release loop-init
+
+on:
+  push:
+    tags:
+      - 'loop-init-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. loop-init-v1.2.2)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', github.event.inputs.tag) || github.ref }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Ensure npm supports trusted publishing (OIDC)
+        run: npm install -g npm@latest
+
+      - name: Test, build & publish
+        working-directory: tools/loop-init
+        run: |
+          # Build monorepo sibling first — declared ^range may not be on npm yet
+          # when cutting audit + init in the same release window.
+          (cd ../loop-audit && npm ci && npm run build)
+          cp package.json package.json.release-bak
+          cp package-lock.json package-lock.json.release-bak
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            p.dependencies['@cobusgreyling/loop-audit'] = 'file:../loop-audit';
+            fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          "
+          npm install
+          mv package.json.release-bak package.json
+          mv package-lock.json.release-bak package-lock.json
+          npm test
+          # package.json keeps registry range (^1.x) for the published tarball
+          npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

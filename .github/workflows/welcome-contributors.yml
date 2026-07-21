@@ -1,0 +1,84 @@
+name: Welcome contributors
+
+# pull_request_target runs in the base-repo context so fork PRs can receive
+# maintainer welcome comments (GITHUB_TOKEN is read-only on pull_request).
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+    paths:
+      - 'stories/**'
+      - 'docs/adopters.md'
+      - 'examples/**'
+      - 'docs/**'
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const opener = pr.user.login;
+            const marker = '— loop-engineering maintainers';
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner: context.repo.owner, repo: context.repo.repo, issue_number: pr.number, per_page: 100 }
+            );
+            if (comments.some((c) => c.body?.includes(marker))) {
+              core.info('Welcome comment already present; skipping.');
+              return;
+            }
+
+            let paths = [];
+            try {
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
+              );
+              paths = files.map((f) => f.filename);
+            } catch (err) {
+              core.warning(`Could not list PR files (${err.message}); inferring from title/body.`);
+            }
+
+            const isStory = pr.title.toLowerCase().includes('story') ||
+              pr.body?.toLowerCase().includes('stories/') ||
+              paths.some((p) => p.startsWith('stories/'));
+            const isAdopter = paths.some((p) => p === 'docs/adopters.md');
+            const isExample = paths.some((p) => p.startsWith('examples/')) ||
+              pr.title.toLowerCase().includes('example');
+            const isDocs = paths.some((p) => p.startsWith('docs/')) ||
+              pr.title.toLowerCase().includes('docs:');
+
+            let kind = 'a contribution';
+            if (isStory) kind = 'a production story';
+            else if (isAdopter) kind = 'an adopter listing';
+            else if (isExample) kind = 'a tool example';
+            else if (isDocs) kind = 'a docs improvement';
+
+            const body = [
+              `Thanks @${opener} for contributing ${kind} — visible, reviewable PRs like this grow the reference for everyone.`,
+              '',
+              '**What happens next**',
+              '- Maintainer aims for **same-day review** on story, adopter, and scoped docs/example PRs ([CONTRIBUTING.md](https://github.com/cobusgreyling/loop-engineering/blob/main/CONTRIBUTING.md#maintainer-response-adopters--stories)).',
+              '- `good first issue` PRs: comment on the linked issue so we can assign and close on merge.',
+              '',
+              '**More ways to help**',
+              '- [Contributor quickstart + open issues](https://github.com/cobusgreyling/loop-engineering/discussions/123)',
+              '- [Good first issue backlog](https://github.com/cobusgreyling/loop-engineering/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)',
+              '',
+              marker
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body
+            });

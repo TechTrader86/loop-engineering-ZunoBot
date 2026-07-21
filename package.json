@@ -1,0 +1,25 @@
+{
+  "name": "loop-engineering",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate:registry": "node scripts/validate-registry.mjs",
+    "check:loop-init": "node scripts/check-loop-init-sync.mjs",
+    "test:loop-audit": "cd tools/loop-audit && npm test",
+    "test:loop-init": "cd tools/loop-init && npm test",
+    "test:loop-cost": "cd tools/loop-cost && npm test",
+    "test:loop-sync": "cd tools/loop-sync && npm test",
+    "test:loop-context": "cd tools/loop-context && npm test",
+    "test:loop-gate": "cd tools/loop-gate && npm test",
+    "test:mcp-server": "cd tools/mcp-server && npm test",
+    "test:loop-worktree": "cd tools/loop-worktree && npm test",
+    "test:tools": "npm run test:loop-audit && npm run test:loop-init && npm run test:loop-cost && npm run test:loop-sync && npm run test:loop-context && npm run test:loop-gate && npm run test:mcp-server && npm run test:loop-worktree",
+    "build:tools": "cd tools/loop-audit && npm run build && cd ../loop-init && npm run build && cd ../loop-cost && npm run build && cd ../loop-sync && npm run build && cd ../loop-context && npm run build && cd ../loop-gate && npm run build && cd ../mcp-server && npm run build && cd ../loop-worktree && npm run build",
+    "contributors:generate": "node scripts/generate-contributors.mjs",
+    "contributors:check": "node scripts/generate-contributors.mjs --check"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "yaml": "^2.8.0"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "@cobusgreyling/loop-gate",
+  "version": "1.0.0",
+  "description": "Mechanical enforcement of LOOP.md/docs/safety.md's path denylist and auto-merge allowlist — evaluate a proposed change against static policy and block or allow it.",
+  "type": "module",
+  "main": "dist/gate.js",
+  "exports": {
+    ".": "./dist/gate.js"
+  },
+  "bin": {
+    "loop-gate": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "loop-engineering",
+    "ai-agents",
+    "coding-agents",
+    "safety",
+    "policy",
+    "auto-merge",
+    "claude-code",
+    "grok",
+    "devtools"
+  ],
+  "author": "Cobus Greyling",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cobusgreyling/loop-engineering.git",
+    "directory": "tools/loop-gate"
+  },
+  "homepage": "https://cobusgreyling.github.io/loop-engineering/",
+  "bugs": {
+    "url": "https://github.com/cobusgreyling/loop-engineering/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "minimatch": "^10.0.0",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
